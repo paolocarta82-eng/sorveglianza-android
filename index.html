@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Copertura"><meta name="theme-color" content="#F7F6F4"><link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" href="./icona.png"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap"><style>body{margin:0;background:#E9E6E1;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}a{color:#E8590C}a:hover{color:#C24A08}textarea,input,button{font-family:inherit}</style><script>if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));</script><script src="./rete-grafo.js"></script></helmet>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#16181B"></rect><g fill="none" stroke-linecap="round"><path d="M28 74 L44 52 L40 34 L58 26" stroke="#0B7A5A" stroke-width="7"></path><path d="M58 26 L72 30" stroke="#E8590C" stroke-width="7"></path><path d="M30 44 L52 60 L70 58" stroke="#5C6169" stroke-width="4"></path></g></svg></template>
+<div style="width:100%;max-width:560px;margin:0 auto;background:#F7F6F4;min-height:100vh;padding-bottom:86px;box-sizing:border-box">
+
+    <sc-if value="{{ isRete }}" hint-placeholder-val="{{ true }}">
+      <div style="min-height:calc(100vh - 86px);background:#F7F6F4;padding:calc(env(safe-area-inset-top) + 16px) 0 40px;box-sizing:border-box">
+        <div style="padding:14px 20px 16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+            <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;color:#5C6169">SORVEGLIANZA SETTIMANALE · {{ wkLabel }}</div>
+            <button onClick="{{ azzera }}" style="all:unset;font:500 10px/1 'IBM Plex Mono',monospace;letter-spacing:.04em;color:#B45309;border:1px solid #DCD9D4;border-radius:5px;padding:6px 8px;cursor:pointer">AZZERA</button>
+          </div>
+          <div style="font:400 12px/1 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#8A8F97;margin-top:6px">{{ wkPeriodo }}</div>
+          <div style="display:flex;align-items:flex-end;gap:10px;margin-top:10px">
+            <div style="font:600 56px/.9 'IBM Plex Mono',monospace;letter-spacing:-.04em;color:#16181B">{{ pctTot }}</div>
+            <div style="font:500 20px/1 'IBM Plex Mono',monospace;color:#8A8F97;padding-bottom:5px">%</div>
+            <div style="flex:1;text-align:right;font:400 12px/1.35 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#5C6169;padding-bottom:4px">rete coperta<br>{{ kmFatti }} di {{ kmTot }} km</div>
+          </div>
+        </div>
+
+        <div style="position:relative;background:#EDEAE4;border-top:1px solid #DCD9D4;border-bottom:1px solid #DCD9D4">
+          <svg viewBox="{{ boxTot }}" width="100%" height="300" style="display:block">
+            <g stroke="#BDB8AE" fill="none" stroke-width="0.9" vector-effect="non-scaling-stroke" stroke-linecap="round">
+              <sc-for list="{{ baseSecondaria }}" as="p" hint-placeholder-count="0"><path d="{{ p.d }}" vector-effect="non-scaling-stroke"></path></sc-for>
+            </g>
+            <g stroke="#B9B4AC" fill="none" stroke-width="1.3" vector-effect="non-scaling-stroke" stroke-linecap="round">
+              <sc-for list="{{ baseSecondo }}" as="p" hint-placeholder-count="0"><path d="{{ p.d }}" vector-effect="non-scaling-stroke"></path></sc-for>
+            </g>
+            <g stroke="#8A8F97" fill="none" stroke-width="2.2" vector-effect="non-scaling-stroke" stroke-linecap="round">
+              <sc-for list="{{ basePrimo }}" as="p" hint-placeholder-count="0"><path d="{{ p.d }}" vector-effect="non-scaling-stroke"></path></sc-for>
+            </g>
+            <g stroke="#0B7A5A" fill="none" stroke-width="0.9" vector-effect="non-scaling-stroke" stroke-linecap="round">
+              <sc-for list="{{ doneMinori }}" as="p" hint-placeholder-count="0"><path d="{{ p.d }}" vector-effect="non-scaling-stroke"></path></sc-for>
+            </g>
+            <g stroke="#E8590C" fill="none" stroke-width="2.6" vector-effect="non-scaling-stroke" stroke-linecap="round">
+              <sc-for list="{{ parzPrimo }}" as="p" hint-placeholder-count="0"><path d="{{ p.d }}" vector-effect="non-scaling-stroke"></path></sc-for>
+            </g>
+            <g stroke="#0B7A5A" fill="none" stroke-width="2.6" vector-effect="non-scaling-stroke" stroke-linecap="round">
+              <sc-for list="{{ donePrimo }}" as="p" hint-placeholder-count="0"><path d="{{ p.d }}" vector-effect="non-scaling-stroke"></path></sc-for>
+            </g>
+          </svg>
+          <div style="position:absolute;left:12px;bottom:12px;background:#F7F6F4;border:1px solid #DCD9D4;border-radius:8px;padding:9px 11px;display:flex;flex-direction:column;gap:7px">
+            <div style="display:flex;align-items:center;gap:8px"><div style="width:18px;height:3px;background:#0B7A5A"></div><div style="font:500 10px/1 'IBM Plex Mono',monospace;color:#16181B">COMPLETO</div></div>
+            <div style="display:flex;align-items:center;gap:8px"><div style="width:18px;height:3px;background:#E8590C"></div><div style="font:500 10px/1 'IBM Plex Mono',monospace;color:#16181B">1 PASSAGGIO SU 2</div></div>
+            <div style="display:flex;align-items:center;gap:8px"><div style="width:18px;height:3px;background:#8A8F97"></div><div style="font:500 10px/1 'IBM Plex Mono',monospace;color:#16181B">DA RILEVARE</div></div>
+          </div>
+        </div>
+
+        <div style="padding:18px 16px 0;display:flex;flex-direction:column;gap:10px">
+          <sc-for list="{{ livelli }}" as="l" hint-placeholder-count="3">
+            <div style="background:#fff;border:1px solid #DCD9D4;border-radius:10px;padding:14px">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
+                <div style="font:600 14px/1.2 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#16181B">{{ l.nome }}</div>
+                <div style="font:500 11px/1 'IBM Plex Mono',monospace;color:#5C6169">{{ l.req }}</div>
+              </div>
+              <div style="height:6px;background:#EDEAE4;border-radius:3px;overflow:hidden;margin-top:11px"><div style="height:6px;background:{{ l.tint }};width:{{ l.pct }}%"></div></div>
+              <div style="display:flex;justify-content:space-between;margin-top:9px">
+                <div style="font:500 11px/1 'IBM Plex Mono',monospace;color:#5C6169">{{ l.km }} / {{ l.kmTot }} km · {{ l.elem }}</div>
+                <div style="font:600 11px/1 'IBM Plex Mono',monospace;color:#16181B">{{ l.pct }}%</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="padding:20px 16px 0">
+          <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;color:#5C6169;margin-bottom:9px">STRADE QUASI CHIUSE · MANCA POCO</div>
+          <div style="background:#fff;border:1px solid #DCD9D4;border-radius:10px;overflow:hidden">
+            <sc-for list="{{ quasi }}" as="q" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid #EDEAE4">
+                <div style="flex:1;min-width:0"><div style="font:600 13px/1.25 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#16181B">{{ q.nome }}</div><div style="font:500 10px/1 'IBM Plex Mono',monospace;color:#5C6169;margin-top:5px">MANCANO {{ q.resto }}</div></div>
+                <div style="width:56px;height:5px;background:#EDEAE4;border-radius:3px;overflow:hidden;flex:none"><div style="height:5px;background:#E8590C;width:{{ q.pct }}%"></div></div>
+                <div style="font:600 11px/1 'IBM Plex Mono',monospace;color:#16181B;width:30px;text-align:right">{{ q.pct }}%</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="padding:20px 16px 0">
+          <button onClick="{{ toGiro }}" style="all:unset;display:block;text-align:center;box-sizing:border-box;width:100%;background:#E8590C;color:#fff;border-radius:10px;padding:18px;font:600 15px/1 'Helvetica Neue',Helvetica,Arial,sans-serif;cursor:pointer">Riprendi il giro · {{ giroNome }}</button>
+          <div style="font:400 12px/1.45 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#5C6169;text-align:center;margin-top:10px">{{ giroResto }} elementi ancora aperti in questo giro</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isGiro }}">
+      <div style="min-height:calc(100vh - 86px);background:#F7F6F4;display:flex;flex-direction:column">
+        <div style="padding:calc(env(safe-area-inset-top) + 16px) 16px 12px;background:#fff;border-bottom:1px solid #DCD9D4;display:flex;align-items:center;gap:12px">
+          <button onClick="{{ toRete }}" style="all:unset;font:400 22px/1 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#E8590C;cursor:pointer;padding:4px 6px">‹</button>
+          <div style="flex:1;min-width:0">
+            <div style="font:600 15px/1.2 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#16181B">{{ giroNome }}</div>
+            <div style="font:500 11px/1.2 'IBM Plex Mono',monospace;color:#5C6169;margin-top:3px">GIRO 2418 · {{ giroElem }} ELEMENTI</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;background:#F0EDE7;border:1px solid #DCD9D4;padding:6px 8px;border-radius:6px">
+            <div style="width:7px;height:7px;border-radius:50%;background:{{ gpsColor }}"></div>
+            <div style="font:500 10px/1 'IBM Plex Mono',monospace;color:#16181B">{{ gpsAcc }}</div>
+          </div>
+        </div>
+
+        <div style="position:relative;height:352px;background:#EDEAE4;overflow:hidden;flex:none">
+          <svg viewBox="{{ boxZoom }}" width="100%" height="352" style="display:block">
+            <g stroke="#CFCAC1" fill="none" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linecap="round">
+              <sc-for list="{{ baseSecondaria }}" as="p" hint-placeholder-count="0"><path d="{{ p.d }}" vector-effect="non-scaling-stroke"></path></sc-for>
+            </g>
+            <g stroke="#B9B4AC" fill="none" stroke-width="4" vector-effect="non-scaling-stroke" stroke-linecap="round">
+              <sc-for list="{{ baseSecondo }}" as="p" hint-placeholder-count="0"><path d="{{ p.d }}" vector-effect="non-scaling-stroke"></path></sc-for>
+            </g>
+            <g stroke="#8A8F97" fill="none" stroke-width="7" vector-effect="non-scaling-stroke" stroke-linecap="round">
+              <sc-for list="{{ basePrimo }}" as="p" hint-placeholder-count="0"><path d="{{ p.d }}" vector-effect="non-scaling-stroke"></path></sc-for>
+            </g>
+            <g stroke="#0B7A5A" fill="none" stroke-width="3" vector-effect="non-scaling-stroke" stroke-linecap="round">
+              <sc-for list="{{ doneMinori }}" as="p" hint-placeholder-count="0"><path d="{{ p.d }}" vector-effect="non-scaling-stroke"></path></sc-for>
+            </g>
+            <g stroke="#E8590C" fill="none" stroke-width="7" vector-effect="non-scaling-stroke" stroke-linecap="round">
+              <sc-for list="{{ parzPrimo }}" as="p" hint-placeholder-count="0"><path d="{{ p.d }}" vector-effect="non-scaling-stroke"></path></sc-for>
+            </g>
+            <g stroke="#0B7A5A" fill="none" stroke-width="7" vector-effect="non-scaling-stroke" stroke-linecap="round">
+              <sc-for list="{{ donePrimo }}" as="p" hint-placeholder-count="0"><path d="{{ p.d }}" vector-effect="non-scaling-stroke"></path></sc-for>
+            </g>
+            <g stroke="#16181B" fill="none" stroke-width="10" vector-effect="non-scaling-stroke" stroke-linecap="round" opacity="0.9">
+              <path d="{{ correnteD }}" vector-effect="non-scaling-stroke"></path>
+            </g>
+            <circle cx="{{ posX }}" cy="{{ posY }}" r="{{ rBig }}" fill="#E8590C" opacity="0.16"></circle>
+            <circle cx="{{ posX }}" cy="{{ posY }}" r="{{ rDot }}" fill="#16181B" stroke="#fff" stroke-width="3" vector-effect="non-scaling-stroke"></circle>
+          </svg>
+          <sc-if value="{{ toast }}">
+            <div style="position:absolute;left:12px;right:12px;top:12px;background:#0B7A5A;border-radius:10px;padding:12px 14px;font:600 13px/1.3 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#fff">{{ toast }}</div>
+          </sc-if>
+        </div>
+
+        <div style="flex:1;background:#fff;border-top:1px solid #DCD9D4;padding:16px 16px 34px;display:flex;flex-direction:column;gap:14px">
+          <div style="border:1px solid #DCD9D4;border-radius:10px;overflow:hidden">
+            <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#F7F6F4;border-bottom:1px solid #DCD9D4">
+              <div style="width:9px;height:9px;border-radius:50%;background:{{ gpsColor }};flex:none"></div>
+              <div style="flex:1;font:600 13px/1.2 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#16181B">{{ gpsStato }}</div>
+              <div style="font:500 11px/1 'IBM Plex Mono',monospace;color:#5C6169">{{ gpsAcc }} · {{ gpsKmh }}</div>
+            </div>
+            <div style="padding:12px 14px;background:#fff">
+              <div style="display:flex;justify-content:space-between;gap:10px">
+                <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;color:#5C6169">PASSATA IN CORSO</div>
+                <div style="font:600 11px/1 'IBM Plex Mono',monospace;color:#16181B">{{ fraz }}% · valida a {{ quotaMin }}%</div>
+              </div>
+              <div style="height:6px;background:#EDEAE4;border-radius:3px;overflow:hidden;margin-top:9px"><div style="height:6px;background:#E8590C;width:{{ fraz }}%"></div></div>
+              <div style="font:400 12px/1.4 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#5C6169;margin-top:9px">{{ gpsDist }}</div>
+            </div>
+          </div>
+
+          <button onClick="{{ toElemento }}" style="all:unset;display:block;box-sizing:border-box;width:100%;background:#F7F6F4;border:1px solid #DCD9D4;border-radius:10px;padding:14px;cursor:pointer;text-align:left" style-hover="background:#F0EDE7">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
+              <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;color:#5C6169">ELEMENTO IN CORSO</div>
+              <div style="font:500 10px/1 'IBM Plex Mono',monospace;color:#5C6169">{{ corrLivello }}</div>
+            </div>
+            <div style="font:600 18px/1.2 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#16181B;margin-top:8px">{{ corrStrada }}</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:9px">
+              <div style="font:500 12px/1 'IBM Plex Mono',monospace;color:#5C6169">{{ corrCodice }} · {{ corrM }} m</div>
+              <div style="display:flex;gap:5px;align-items:center">
+                <sc-for list="{{ corrPassi }}" as="p" hint-placeholder-count="2">
+                  <div style="width:22px;height:8px;border-radius:2px;background:{{ p.bg }};border:1px solid {{ p.bd }}"></div>
+                </sc-for>
+                <div style="font:600 11px/1 'IBM Plex Mono',monospace;color:#16181B;margin-left:4px">{{ corrStato }}</div>
+              </div>
+            </div>
+          </button>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:#DCD9D4;border:1px solid #DCD9D4;border-radius:8px;overflow:hidden">
+            <div style="background:#fff;padding:11px 12px"><div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;color:#5C6169">{{ kmLabel }}</div><div style="font:500 16px/1 'IBM Plex Mono',monospace;color:#16181B;margin-top:7px">{{ kmOggi }}</div></div>
+            <div style="background:#fff;padding:11px 12px"><div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;color:#5C6169">CHIUSI</div><div style="font:500 16px/1 'IBM Plex Mono',monospace;color:#0B7A5A;margin-top:7px">{{ chiusiOggi }}</div></div>
+            <div style="background:#fff;padding:11px 12px"><div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;color:#5C6169">ANOMALIE</div><div style="font:500 16px/1 'IBM Plex Mono',monospace;color:{{ anomColor }};margin-top:7px">{{ nAnomalie }}</div></div>
+          </div>
+
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:7px">
+              <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;color:#5C6169">AVANZAMENTO GIRO</div>
+              <div style="font:600 10px/1 'IBM Plex Mono',monospace;color:#16181B">{{ giroPct }}%</div>
+            </div>
+            <div style="height:6px;background:#EDEAE4;border-radius:3px;overflow:hidden"><div style="height:6px;background:#E8590C;width:{{ giroPct }}%"></div></div>
+          </div>
+
+          <div style="display:flex;gap:10px">
+            <button onClick="{{ toggleRec }}" style="all:unset;flex:1;box-sizing:border-box;text-align:center;background:{{ recBg }};color:{{ recFg }};border:1px solid {{ recBd }};border-radius:10px;padding:16px 12px;font:600 14px/1 'Helvetica Neue',Helvetica,Arial,sans-serif;cursor:pointer">{{ recLabel }}</button>
+            <button onClick="{{ openAnomalia }}" style="all:unset;width:112px;box-sizing:border-box;text-align:center;background:#fff;color:#16181B;border:1px solid #16181B;border-radius:10px;padding:16px 12px;font:600 14px/1 'Helvetica Neue',Helvetica,Arial,sans-serif;cursor:pointer" style-hover="background:#F0EDE7">Anomalia</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="display:flex;align-items:center;gap:8px;padding:4px 2px">
+              <div style="width:7px;height:7px;border-radius:50%;background:{{ wakeColor }};flex:none"></div>
+              <div style="flex:1;font:400 12px/1.35 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#5C6169">{{ wakeLabel }}</div>
+            </div>
+            <div style="font:400 12px/1.35 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#8A8F97;padding:0 2px 4px">{{ savedLabel }}</div>
+            <button onClick="{{ esporta }}" style="all:unset;display:block;text-align:center;width:100%;box-sizing:border-box;padding:8px;font:500 13px/1 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#5C6169;cursor:pointer;text-decoration:underline">Esporta copertura (CSV)</button>
+            <button onClick="{{ toRiepilogo }}" style="all:unset;display:block;text-align:center;width:100%;box-sizing:border-box;padding:8px;font:500 13px/1 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#5C6169;cursor:pointer;text-decoration:underline">Chiudi giro e invia copertura</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isElemento }}">
+      <div style="min-height:calc(100vh - 86px);background:#F7F6F4;padding:0 0 40px">
+        <div style="padding:calc(env(safe-area-inset-top) + 16px) 16px 12px;background:#fff;border-bottom:1px solid #DCD9D4;display:flex;align-items:center;gap:12px">
+          <button onClick="{{ toGiro }}" style="all:unset;font:400 22px/1 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#E8590C;cursor:pointer;padding:4px 6px">‹</button>
+          <div style="flex:1;min-width:0"><div style="font:600 15px/1.2 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#16181B">{{ corrStrada }}</div><div style="font:500 11px/1.2 'IBM Plex Mono',monospace;color:#5C6169;margin-top:3px">ELEMENTO {{ corrCodice }} · {{ corrLivello }}</div></div>
+        </div>
+        <div style="padding:16px">
+          <div style="background:#EDEAE4;border:1px solid #DCD9D4;border-radius:10px;overflow:hidden">
+            <svg viewBox="{{ boxElem }}" width="100%" height="170" style="display:block">
+              <g stroke="#CFCAC1" fill="none" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linecap="round">
+                <sc-for list="{{ baseSecondaria }}" as="p" hint-placeholder-count="0"><path d="{{ p.d }}" vector-effect="non-scaling-stroke"></path></sc-for>
+              </g>
+              <g stroke="#B9B4AC" fill="none" stroke-width="5" vector-effect="non-scaling-stroke" stroke-linecap="round">
+                <sc-for list="{{ basePrimo }}" as="p" hint-placeholder-count="0"><path d="{{ p.d }}" vector-effect="non-scaling-stroke"></path></sc-for>
+              </g>
+              <g stroke="#E8590C" fill="none" stroke-width="9" vector-effect="non-scaling-stroke" stroke-linecap="round">
+                <path d="{{ correnteD }}" vector-effect="non-scaling-stroke"></path>
+              </g>
+            </svg>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#DCD9D4;border:1px solid #DCD9D4;border-radius:10px;overflow:hidden;margin-top:16px">
+            <div style="background:#fff;padding:14px"><div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;color:#5C6169">LUNGHEZZA</div><div style="font:600 22px/1 'IBM Plex Mono',monospace;color:#16181B;margin-top:9px">{{ corrM }} m</div></div>
+            <div style="background:#fff;padding:14px"><div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;color:#5C6169">PASSAGGI</div><div style="font:600 22px/1 'IBM Plex Mono',monospace;color:{{ corrColor }};margin-top:9px">{{ corrStato }}</div></div>
+            <div style="background:#fff;padding:14px"><div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;color:#5C6169">ID STRADA</div><div style="font:500 15px/1 'IBM Plex Mono',monospace;color:#16181B;margin-top:11px">{{ corrIdStrada }}</div></div>
+            <div style="background:#fff;padding:14px"><div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;color:#5C6169">ULTIMO VIDEO</div><div style="font:500 15px/1 'IBM Plex Mono',monospace;color:#16181B;margin-top:11px">{{ corrUltimo }}</div></div>
+          </div>
+
+          <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;color:#5C6169;margin:20px 0 8px">CONDIZIONI DEL PASSAGGIO</div>
+          <div style="background:#fff;border:1px solid #DCD9D4;border-radius:10px;overflow:hidden">
+            <sc-for list="{{ checklist }}" as="c" hint-placeholder-count="4">
+              <button onClick="{{ c.toggle }}" style="all:unset;display:flex;box-sizing:border-box;width:100%;align-items:center;gap:12px;padding:14px;border-bottom:1px solid #EDEAE4;cursor:pointer" style-hover="background:#F7F6F4">
+                <div style="width:22px;height:22px;border-radius:5px;border:2px solid {{ c.bd }};background:{{ c.bg }};color:#fff;font:600 12px/1 'Helvetica Neue',Helvetica,Arial,sans-serif;display:flex;align-items:center;justify-content:center;flex:none">{{ c.tick }}</div>
+                <div style="flex:1;text-align:left;font:400 15px/1.35 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#16181B">{{ c.label }}</div>
+              </button>
+            </sc-for>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:18px">
+            <button onClick="{{ registra }}" style="all:unset;display:block;text-align:center;box-sizing:border-box;width:100%;background:#16181B;color:#fff;border-radius:10px;padding:17px;font:600 15px/1 'Helvetica Neue',Helvetica,Arial,sans-serif;cursor:pointer">Convalida passaggio {{ corrProssimo }}</button>
+            <button onClick="{{ openAnomalia }}" style="all:unset;display:block;text-align:center;box-sizing:border-box;width:100%;background:#fff;color:#B45309;border:1px solid #B45309;border-radius:10px;padding:17px;font:600 15px/1 'Helvetica Neue',Helvetica,Arial,sans-serif;cursor:pointer">Rileva anomalia su questo elemento</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isAnomalia }}">
+      <div style="min-height:calc(100vh - 86px);background:#F7F6F4;padding:0 0 40px">
+        <div style="padding:calc(env(safe-area-inset-top) + 16px) 16px 12px;background:#fff;border-bottom:1px solid #DCD9D4;display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <button onClick="{{ toGiro }}" style="all:unset;font:400 15px/1 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#E8590C;cursor:pointer;padding:4px 2px">Annulla</button>
+          <div style="font:600 15px/1.2 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#16181B">Nuova anomalia</div>
+          <div style="font:500 11px/1 'IBM Plex Mono',monospace;color:#5C6169">{{ corrCodice }}</div>
+        </div>
+        <div style="padding:16px">
+          <div style="padding:13px;background:#F0EDE7;border:1px solid #DCD9D4;border-radius:8px;font:500 12px/1.4 'IBM Plex Mono',monospace;color:#16181B">{{ corrStrada }} · {{ corrCodice }}</div>
+          <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;color:#5C6169;margin:20px 0 9px">TIPOLOGIA</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <sc-for list="{{ tipi }}" as="t" hint-placeholder-count="6">
+              <button onClick="{{ t.pick }}" style="all:unset;box-sizing:border-box;background:{{ t.bg }};color:{{ t.fg }};border:1px solid {{ t.bd }};border-radius:8px;padding:11px 13px;font:500 14px/1 'Helvetica Neue',Helvetica,Arial,sans-serif;cursor:pointer">{{ t.label }}</button>
+            </sc-for>
+          </div>
+          <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;color:#5C6169;margin:22px 0 9px">GRAVITÀ</div>
+          <div style="display:flex;gap:1px;background:#DCD9D4;border:1px solid #DCD9D4;border-radius:8px;overflow:hidden">
+            <sc-for list="{{ gravita }}" as="g" hint-placeholder-count="3">
+              <button onClick="{{ g.pick }}" style="all:unset;flex:1;text-align:center;background:{{ g.bg }};color:{{ g.fg }};padding:14px 8px;font:600 14px/1 'Helvetica Neue',Helvetica,Arial,sans-serif;cursor:pointer">{{ g.label }}</button>
+            </sc-for>
+          </div>
+          <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;color:#5C6169;margin:22px 0 9px">RILIEVO FOTOGRAFICO</div>
+          <div style="display:flex;gap:8px">
+            <sc-for list="{{ foto }}" as="f" hint-placeholder-count="2">
+              <div style="flex:1;aspect-ratio:3/4;background:#EDEAE4;border:1px solid #DCD9D4;border-radius:8px;display:flex;align-items:center;justify-content:center;font:500 10px/1.3 'IBM Plex Mono',monospace;color:#5C6169;text-align:center">{{ f.label }}</div>
+            </sc-for>
+            <button onClick="{{ addFoto }}" style="all:unset;flex:1;aspect-ratio:3/4;box-sizing:border-box;background:#fff;border:1px dashed #B9B4AC;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer" style-hover="border-color:#E8590C">
+              <div style="font:400 22px/1 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#E8590C">＋</div>
+              <div style="font:500 10px/1 'IBM Plex Mono',monospace;color:#5C6169">SCATTA</div>
+            </button>
+          </div>
+          <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;color:#5C6169;margin:22px 0 9px">DESCRIZIONE</div>
+          <textarea value="{{ note }}" onChange="{{ setNote }}" placeholder="Estensione, profondità, provvedimenti immediati…" rows="4" style="width:100%;box-sizing:border-box;background:#fff;border:1px solid #DCD9D4;border-radius:8px;padding:13px;font:400 15px/1.45 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#16181B;resize:none;outline:none"></textarea>
+          <div style="display:flex;gap:8px;margin-top:14px;padding:13px;background:#F0EDE7;border:1px solid #DCD9D4;border-radius:8px">
+            <div style="flex:1"><div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;color:#5C6169">POSIZIONE ACQUISITA</div><div style="font:500 13px/1.3 'IBM Plex Mono',monospace;color:{{ fixColor }};margin-top:6px">{{ fixCoord }}</div></div>
+            <div style="font:500 10px/1 'IBM Plex Mono',monospace;color:{{ gpsColor }};align-self:flex-end">{{ gpsAcc }}</div>
+          </div>
+          <button onClick="{{ salvaAnomalia }}" style="all:unset;display:block;text-align:center;box-sizing:border-box;width:100%;margin-top:18px;background:{{ salvaBg }};color:#fff;border-radius:10px;padding:17px;font:600 15px/1 'Helvetica Neue',Helvetica,Arial,sans-serif;cursor:pointer">{{ salvaLabel }}</button>
+          <div style="font:400 12px/1.45 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#5C6169;text-align:center;margin-top:10px">Salvata in locale, inviata alla chiusura del giro</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isRiepilogo }}">
+      <div style="min-height:calc(100vh - 86px);background:#F7F6F4;padding:0 0 40px">
+        <div style="padding:calc(env(safe-area-inset-top) + 16px) 16px 12px;background:#fff;border-bottom:1px solid #DCD9D4;display:flex;align-items:center;gap:12px">
+          <button onClick="{{ toGiro }}" style="all:unset;font:400 22px/1 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#E8590C;cursor:pointer;padding:4px 6px">‹</button>
+          <div style="flex:1"><div style="font:600 15px/1.2 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#16181B">Chiusura giro 2418</div><div style="font:500 11px/1.2 'IBM Plex Mono',monospace;color:#5C6169;margin-top:3px">{{ giroNome }} · 8 SET 2026</div></div>
+        </div>
+        <div style="padding:16px">
+          <div style="background:#16181B;border-radius:12px;padding:18px">
+            <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;color:#D6D2CB">COPERTURA RETE DOPO QUESTO GIRO</div>
+            <div style="display:flex;align-items:flex-end;gap:8px;margin-top:10px">
+              <div style="font:600 44px/.9 'IBM Plex Mono',monospace;letter-spacing:-.03em;color:#fff">{{ pctTot }}</div>
+              <div style="font:500 16px/1 'IBM Plex Mono',monospace;color:#8A8F97;padding-bottom:4px">%</div>
+              <div style="flex:1;text-align:right;font:500 12px/1 'IBM Plex Mono',monospace;color:#0B9B72;padding-bottom:6px">+{{ deltaPct }} pt oggi</div>
+            </div>
+            <div style="height:6px;background:#3A3D42;border-radius:3px;overflow:hidden;margin-top:14px"><div style="height:6px;background:#E8590C;width:{{ pctTot }}%"></div></div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#DCD9D4;border:1px solid #DCD9D4;border-radius:10px;overflow:hidden;margin-top:16px">
+            <div style="background:#fff;padding:15px"><div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;color:#5C6169">KM PERCORSI</div><div style="font:600 26px/1 'IBM Plex Mono',monospace;color:#16181B;margin-top:9px">{{ kmOggi }}</div></div>
+            <div style="background:#fff;padding:15px"><div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;color:#5C6169">ELEMENTI CHIUSI</div><div style="font:600 26px/1 'IBM Plex Mono',monospace;color:#0B7A5A;margin-top:9px">{{ chiusiOggi }}</div></div>
+            <div style="background:#fff;padding:15px"><div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;color:#5C6169">PRIMI PASSAGGI</div><div style="font:600 26px/1 'IBM Plex Mono',monospace;color:#E8590C;margin-top:9px">{{ primiOggi }}</div></div>
+            <div style="background:#fff;padding:15px"><div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;color:#5C6169">ANOMALIE</div><div style="font:600 26px/1 'IBM Plex Mono',monospace;color:{{ anomColor }};margin-top:9px">{{ nAnomalie }}</div></div>
+          </div>
+
+          <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;color:#5C6169;margin:22px 0 9px">STRADE CHIUSE OGGI</div>
+          <div style="background:#fff;border:1px solid #DCD9D4;border-radius:10px;overflow:hidden">
+            <sc-for list="{{ chiuseOggi }}" as="c" hint-placeholder-count="2">
+              <div style="display:flex;gap:12px;align-items:center;padding:14px;border-bottom:1px solid #EDEAE4">
+                <div style="width:22px;height:22px;border-radius:5px;background:#0B7A5A;color:#fff;font:600 12px/1 'Helvetica Neue',Helvetica,Arial,sans-serif;display:flex;align-items:center;justify-content:center;flex:none">✓</div>
+                <div style="flex:1;min-width:0;font:600 14px/1.25 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#16181B">{{ c.nome }}</div>
+                <div style="font:500 11px/1 'IBM Plex Mono',monospace;color:#5C6169">{{ c.m }} m</div>
+              </div>
+            </sc-for>
+            <sc-if value="{{ noChiuse }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:16px;font:400 14px/1.35 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#5C6169">Nessun elemento chiuso in questo giro</div>
+            </sc-if>
+          </div>
+
+          <div style="font:500 11px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;color:#5C6169;margin:22px 0 9px">ANOMALIE RILEVATE</div>
+          <div style="background:#fff;border:1px solid #DCD9D4;border-radius:10px;overflow:hidden">
+            <sc-for list="{{ anomalie }}" as="a" hint-placeholder-count="2">
+              <div style="display:flex;gap:12px;align-items:center;padding:14px;border-bottom:1px solid #EDEAE4">
+                <div style="width:34px;height:34px;border-radius:6px;background:#EDEAE4;border:1px solid #DCD9D4;flex:none"></div>
+                <div style="flex:1;min-width:0"><div style="font:600 14px/1.2 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#16181B">{{ a.tipo }}</div><div style="font:500 11px/1.2 'IBM Plex Mono',monospace;color:#5C6169;margin-top:4px">{{ a.dove }} · {{ a.nFoto }} FOTO</div></div>
+                <div style="font:600 10px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;color:{{ a.fg }};background:{{ a.bg }};padding:5px 7px;border-radius:4px">{{ a.gravita }}</div>
+              </div>
+            </sc-for>
+            <sc-if value="{{ noAnomalie }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:16px;font:400 14px/1.35 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#5C6169">Nessuna anomalia segnalata</div>
+            </sc-if>
+          </div>
+
+          <button onClick="{{ sync }}" style="all:unset;display:block;text-align:center;box-sizing:border-box;width:100%;margin-top:18px;background:{{ syncBg }};color:#fff;border-radius:10px;padding:18px;font:600 15px/1 'Helvetica Neue',Helvetica,Arial,sans-serif;cursor:pointer">{{ syncLabel }}</button>
+          <div style="font:400 12px/1.45 'Helvetica Neue',Helvetica,Arial,sans-serif;color:#5C6169;text-align:center;margin-top:10px">{{ syncHint }}</div>
+          <button onClick="{{ azzera }}" style="all:unset;display:block;text-align:center;box-sizing:border-box;width:100%;margin-top:16px;background:#fff;color:#B45309;border:1px solid #B45309;border-radius:10px;padding:15px;font:600 14px/1 'Helvetica Neue',Helvetica,Arial,sans-serif;cursor:pointer">Chiudi la settimana e azzera la copertura</button>
+        </div>
+      </div>
+    </sc-if>
+
+  
+<div style="position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;background:#fff;border-top:1px solid #DCD9D4;padding:8px 8px calc(env(safe-area-inset-bottom) + 8px)">
+  <sc-for list="{{ rail }}" as="tab" hint-placeholder-count="5">
+    <button onClick="{{ tab.go }}" style="all:unset;flex:1;box-sizing:border-box;text-align:center;padding:12px 4px;border-radius:8px;background:{{ tab.bg }};color:{{ tab.fg }};font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.04em;cursor:pointer">{{ tab.label }}</button>
+  </sc-for>
+</div></div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:500,&quot;height&quot;:1040},&quot;tolleranzaM&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:25,&quot;min&quot;:10,&quot;max&quot;:50,&quot;step&quot;:5,&quot;unit&quot;:&quot;m&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Regole di validazione&quot;},&quot;quotaMin&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:80,&quot;min&quot;:50,&quot;max&quot;:100,&quot;step&quot;:5,&quot;unit&quot;:&quot;%&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Regole di validazione&quot;}}">
+const TIPI = ['Buca', 'Dissesto', 'Segnaletica', 'Barriera', 'Scarico ostruito', 'Altro'];
+const GRAV = ['Bassa', 'Media', 'Alta'];
+const CHK = ['Video acquisito senza interruzioni', 'Velocità entro 40 km/h', 'Corsia corretta', 'Visibilità adeguata'];
+const SCREENS = [['rete', 'RETE'], ['giro', 'GIRO'], ['elemento', 'ELEMENTO'], ['anomalia', 'ANOMALIA'], ['riepilogo', 'CHIUSURA']];
+const LIV = {
+  primo: { nome: 'Assi di scorrimento · 1º livello', req: 2, tint: '#E8590C' },
+  secondo: { nome: 'Viabilità di 2º livello', req: 1, tint: '#B45309' },
+  secondaria: { nome: 'Rete secondaria', req: 1, tint: '#0B7A5A' },
+};
+
+class Component extends DCLogic {
+  state = {
+    screen: 'rete', ready: false, rec: false, wakeOn: false, wk: '', savedAt: 0,
+    gpsAcc: null, gpsKmh: null, gpsPos: null, gpsErr: '', match: null, frazione: 0,
+    cov: {}, idx: 0, kmOggi: 0, chiusiOggi: [], primiOggi: 0, pctIniziale: 0,
+    chk: [true, true, false, false], toast: '',
+    tipo: 'Buca', grav: 'Media', nFoto: 2, note: '', salvata: false,
+    anomalie: [], syncState: 'idle',
+  };
+
+  componentDidMount() {
+    const carica = window.__RETE
+      ? Promise.resolve(window.__RETE)
+      : fetch('./rete-grafo.json').then(r => r.json());
+    carica.then(g => {
+      this.g = g;
+      const [ex, ey] = g.extent;
+      this.ex = ex; this.ey = ey;
+      const d = pts => 'M ' + pts.map(p => p[0] + ' ' + (ey - p[1])).join(' L ');
+      this.feats = [];
+      for (const [key, L] of Object.entries(g.layers)) {
+        for (const f of L.feats) {
+          this.feats.push({
+            id: key + ':' + f.f, key, req: LIV[key].req, strada: f.s || 'senza nome',
+            cod: f.e || '—', m: f.m, d: d(f.p), pts: f.p,
+            mid: f.p[Math.floor(f.p.length / 2)],
+          });
+        }
+      }
+      this.byId = {}; for (const f of this.feats) this.byId[f.id] = f;
+      this.base = { primo: [], secondo: [], secondaria: [] };
+      for (const f of this.feats) this.base[f.key].push({ d: f.d });
+const xs = [], ys = [];
+      for (const ft of this.feats) for (const p of ft.pts) { xs.push(p[0]); ys.push(ey - p[1]); }
+      xs.sort((a, b) => a - b); ys.sort((a, b) => a - b);
+      const q = (arr, t) => arr[Math.floor((arr.length - 1) * t)];
+      let x0 = q(xs, 0.01), x1 = q(xs, 0.99), y0 = q(ys, 0.01), y1 = q(ys, 0.99);
+      const ar = 402 / 300, w0 = x1 - x0, h0 = y1 - y0;
+      let w = w0, h = h0;
+      if (w / h < ar) w = h * ar; else h = w / ar;
+      const pad = w * 0.04;
+      this.fitBox = [
+        Math.round(x0 - (w - w0) / 2 - pad), Math.round(y0 - (h - h0) / 2 - pad / ar),
+        Math.round(w + pad * 2), Math.round(h + pad * 2 / ar),
+      ].join(' ');
+      this.kmTot = {}; this.nElem = {};
+      for (const [k, L] of Object.entries(g.layers)) { this.kmTot[k] = L.km; this.nElem[k] = L.n; }
+
+      this.bins = {}; this.cum = {};
+      for (const f of this.feats) {
+        const c = [0];
+        for (let i = 1; i < f.pts.length; i++) c.push(c[i - 1] + Math.hypot(f.pts[i][0] - f.pts[i - 1][0], f.pts[i][1] - f.pts[i - 1][1]));
+        this.cum[f.id] = c;
+        this.bins[f.id] = new Uint8Array(Math.max(1, Math.round(f.m / 40)));
+      }
+      this.grid = {}; this.cell = 250;
+      for (const f of this.feats) {
+        for (let i = 1; i < f.pts.length; i++) {
+          const a = f.pts[i - 1], b = f.pts[i];
+          const L = Math.hypot(b[0] - a[0], b[1] - a[1]);
+          const n = Math.max(1, Math.ceil(L / 100));
+          for (let k = 0; k <= n; k++) {
+            const t = k / n, gx = Math.floor((a[0] + (b[0] - a[0]) * t) / this.cell), gy = Math.floor((a[1] + (b[1] - a[1]) * t) / this.cell);
+            const key = gx + '_' + gy;
+            const set = this.grid[key] || (this.grid[key] = new Set());
+            set.add(f.id);
+          }
+        }
+      }
+      // giro assegnato: la strada di 1º livello con più elementi + la secondaria attorno
+      const perStrada = {};
+      for (const f of this.feats) if (f.key === 'primo') (perStrada[f.strada] = perStrada[f.strada] || []).push(f);
+      const nome = Object.keys(perStrada).sort((a, b) => perStrada[b].length - perStrada[a].length)[0];
+      const main = perStrada[nome].slice().sort((a, b) => a.cod.localeCompare(b.cod));
+      const c = main[Math.floor(main.length / 2)].mid;
+      const vicine = this.feats
+        .filter(f => f.key !== 'primo' && Math.hypot(f.mid[0] - c[0], f.mid[1] - c[1]) < 900)
+        .sort((a, b) => Math.hypot(a.mid[0] - c[0], a.mid[1] - c[1]) - Math.hypot(b.mid[0] - c[0], b.mid[1] - c[1]))
+        .slice(0, 14);
+      this.giroNome = nome; this.route = main.concat(vicine);
+
+      const wk = this.wk = weekKey(new Date());
+      const cov = {};
+      for (const f of this.feats) cov[f.id] = 0;
+      let km = 0, chiusi = [], primi = 0, anom = [];
+      try {
+        const raw = localStorage.getItem('sorv:v1:' + wk);
+        if (raw) {
+          const d = JSON.parse(raw);
+          for (const k in (d.cov || {})) if (cov[k] !== undefined) cov[k] = d.cov[k];
+          for (const id in (d.bins || {})) if (this.bins[id]) for (const i of d.bins[id]) if (i < this.bins[id].length) this.bins[id][i] = 1;
+          km = d.km || 0; chiusi = d.chiusi || []; primi = d.primi || 0; anom = d.anom || [];
+        }
+      } catch (e) {}
+      this.setState({ ready: true, wk, cov, kmOggi: km, chiusiOggi: chiusi, primiOggi: primi, anomalie: anom, pctIniziale: this.pct(cov) });
+      if (localStorage.getItem('sorv:rec') === '1') this.gps(true);
+    });
+    this.onVis = () => {
+      if (document.visibilityState === 'visible') { if (this.state.rec) { this.wake(); this.gps(true); } }
+      else this.saveNow();
+    };
+    document.addEventListener('visibilitychange', this.onVis);
+    this.onLeave = () => this.saveNow();
+    addEventListener('pagehide', this.onLeave);
+    this.timer = setInterval(() => { if (this.state.rec) this.saveNow(); }, 20000);
+  }
+  componentWillUnmount() {
+    clearInterval(this.timer); clearTimeout(this.tt); clearTimeout(this.st);
+    document.removeEventListener('visibilitychange', this.onVis);
+    removeEventListener('pagehide', this.onLeave);
+    if (this.watch != null) navigator.geolocation.clearWatch(this.watch);
+    if (this.wl) { try { this.wl.release(); } catch (e) {} }
+  }
+
+  save() { clearTimeout(this.st); this.st = setTimeout(() => this.saveNow(), 1500); }
+  saveNow() {
+    const s = this.state;
+    if (!s.ready || !this.wk) return;
+    const cov = {};
+    for (const k in s.cov) if (s.cov[k]) cov[k] = s.cov[k];
+    const bins = {};
+    for (const id in this.bins) {
+      const b = this.bins[id], on = [];
+      for (let i = 0; i < b.length; i++) if (b[i]) on.push(i);
+      if (on.length) bins[id] = on;
+    }
+    try {
+      localStorage.setItem('sorv:v1:' + this.wk, JSON.stringify({ cov, bins, km: s.kmOggi, chiusi: s.chiusiOggi, primi: s.primiOggi, anom: s.anomalie, ts: Date.now() }));
+      this.setState({ savedAt: Date.now() });
+    } catch (e) {}
+  }
+  async wake() {
+    if (!('wakeLock' in navigator) || this.wl) return;
+    try {
+      this.wl = await navigator.wakeLock.request('screen');
+      this.setState({ wakeOn: true });
+      this.wl.addEventListener('release', () => { this.wl = null; this.setState({ wakeOn: false }); });
+    } catch (e) { this.setState({ wakeOn: false }); }
+  }
+  azzeraSettimana() {
+    if (!confirm('Azzerare la copertura della settimana ' + this.wk + '? Una copia resta nell\u2019archivio locale.')) return;
+    try {
+      const raw = localStorage.getItem('sorv:v1:' + this.wk);
+      if (raw) localStorage.setItem('sorv:arch:' + this.wk + ':' + Date.now(), raw);
+      localStorage.removeItem('sorv:v1:' + this.wk);
+    } catch (e) {}
+    const cov = {};
+    for (const f of this.feats) { cov[f.id] = 0; this.bins[f.id] = new Uint8Array(this.bins[f.id].length); }
+    this.setState({ cov, kmOggi: 0, chiusiOggi: [], primiOggi: 0, anomalie: [], pctIniziale: 0, syncState: 'idle', screen: 'rete', toast: '' });
+  }
+  scarica(nome, testo) {
+    const b = new Blob(['\ufeff' + testo], { type: 'text/csv;charset=utf-8' });
+    const u = URL.createObjectURL(b), a = document.createElement('a');
+    a.href = u; a.download = nome; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(u), 4000);
+  }
+  esportaCopertura() {
+    const s = this.state;
+    const r = [['settimana', 'id_elemento', 'livello', 'strada', 'codice', 'lunghezza_m', 'passaggi', 'richiesti', 'stato'].join(';')];
+    for (const f of this.feats) {
+      const c = Math.min(s.cov[f.id] || 0, f.req);
+      r.push([this.wk, f.id.split(':')[1], f.key, '"' + f.strada.replace(/"/g, "'") + '"', f.cod, f.m, c, f.req,
+        c >= f.req ? 'sorvegliato' : c > 0 ? 'parziale' : 'da rilevare'].join(';'));
+    }
+    this.scarica('copertura_' + this.wk + '.csv', r.join('\n'));
+  }
+  esportaAnomalie() {
+    const r = [['settimana', 'tipologia', 'gravita', 'elemento', 'n_foto'].join(';')];
+    for (const a of this.state.anomalie) r.push([this.wk, a.tipo, a.gravita, '"' + a.dove.replace(/"/g, "'") + '"', a.nFoto].join(';'));
+    this.scarica('anomalie_' + this.wk + '.csv', r.join('\n'));
+  }
+
+  pct(cov) {
+    let done = 0, tot = 0;
+    for (const f of this.feats) { tot += f.m; done += f.m * Math.min(cov[f.id] || 0, f.req) / f.req; }
+    return (done / tot) * 100;
+  }
+  avanza() {
+    const f = this.route[this.state.idx % this.route.length];
+    this.setState(s => {
+      const cov = Object.assign({}, s.cov);
+      const prima = cov[f.id] || 0;
+      cov[f.id] = Math.min(f.req, prima + 1);
+      const chiuso = prima < f.req && cov[f.id] === f.req;
+      const avanti = cov[f.id] >= f.req;
+      return {
+        cov,
+        idx: avanti ? (s.idx + 1) % this.route.length : s.idx,
+        kmOggi: s.kmOggi + Math.min(f.m, 1500) / 1000 * 0.25,
+        primiOggi: prima === 0 ? s.primiOggi + 1 : s.primiOggi,
+        chiusiOggi: chiuso ? s.chiusiOggi.concat([{ nome: f.strada + ' · ' + f.cod, m: f.m }]) : s.chiusiOggi,
+        toast: chiuso ? 'Elemento chiuso · ' + f.cod + ' · ' + f.strada : prima === 0 ? 'Primo passaggio registrato · manca il secondo' : '',
+      };
+    });
+    clearTimeout(this.tt);
+    this.tt = setTimeout(() => this.setState({ toast: '' }), 2200);
+    this.save();
+  }
+  // WGS84 -> UTM 32N (metri), lo stesso sistema del grafo
+  proj(lon, lat) {
+    const a = 6378137, f = 1 / 298.257223563, e2 = 2 * f - f * f, k0 = 0.9996;
+    const r = Math.PI / 180, φ = lat * r, λ = lon * r, λ0 = 9 * r;
+    const N = a / Math.sqrt(1 - e2 * Math.sin(φ) ** 2);
+    const T = Math.tan(φ) ** 2, C = e2 / (1 - e2) * Math.cos(φ) ** 2;
+    const A = (λ - λ0) * Math.cos(φ);
+    const e4 = e2 * e2, e6 = e4 * e2;
+    const M = a * ((1 - e2 / 4 - 3 * e4 / 64 - 5 * e6 / 256) * φ
+      - (3 * e2 / 8 + 3 * e4 / 32 + 45 * e6 / 1024) * Math.sin(2 * φ)
+      + (15 * e4 / 256 + 45 * e6 / 1024) * Math.sin(4 * φ)
+      - (35 * e6 / 3072) * Math.sin(6 * φ));
+    const x = k0 * N * (A + (1 - T + C) * A ** 3 / 6 + (5 - 18 * T + T * T + 72 * C - 58 * e2 / (1 - e2)) * A ** 5 / 120) + 500000;
+    const y = k0 * (M + N * Math.tan(φ) * (A * A / 2 + (5 - T + 9 * C + 4 * C * C) * A ** 4 / 24
+      + (61 - 58 * T + T * T + 600 * C - 330 * e2 / (1 - e2)) * A ** 6 / 720));
+    return [x, y];
+  }
+  // aggancia un punto al segmento più vicino: {id, dist, s}
+  matchAt(x, y) {
+    const gx = Math.floor(x / this.cell), gy = Math.floor(y / this.cell);
+    const ids = new Set();
+    for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) {
+      const set = this.grid[(gx + i) + '_' + (gy + j)];
+      if (set) for (const id of set) ids.add(id);
+    }
+    let best = null;
+    for (const id of ids) {
+      const f = this.byId[id], cum = this.cum[id];
+      for (let i = 1; i < f.pts.length; i++) {
+        const a = f.pts[i - 1], b = f.pts[i];
+        const dx = b[0] - a[0], dy = b[1] - a[1], L2 = dx * dx + dy * dy;
+        let t = L2 ? ((x - a[0]) * dx + (y - a[1]) * dy) / L2 : 0;
+        t = Math.max(0, Math.min(1, t));
+        const d = Math.hypot(x - (a[0] + dx * t), y - (a[1] + dy * t));
+        if (!best || d < best.dist) best = { id, dist: d, s: cum[i - 1] + t * Math.sqrt(L2) };
+      }
+    }
+    return best;
+  }
+  onFix(p) {
+    if (!this.state.ready) return;
+    const [x, y] = this.proj(p.coords.longitude, p.coords.latitude);
+    const px = x - this.g.origin[0], py = y - this.g.origin[1];
+    const acc = p.coords.accuracy || 0;
+    const kmh = p.coords.speed != null && p.coords.speed >= 0 ? p.coords.speed * 3.6 : null;
+    const tol = this.props.tolleranzaM ?? 25;
+    const quota = (this.props.quotaMin ?? 80) / 100;
+    const m = this.matchAt(px, py);
+    let dKm = 0;
+    if (this.last) dKm = Math.hypot(px - this.last[0], py - this.last[1]) / 1000;
+    if (dKm > 0.2 || acc > 60) dKm = 0; // salto di segnale o fix inaffidabile
+    this.last = [px, py];
+
+    const agganciato = m && acc <= 60 && m.dist <= tol + Math.min(acc, 20);
+    let frazione = 0, chiuso = null, nuovo = null;
+    let cov = this.state.cov;
+    if (agganciato) {
+      const f = this.byId[m.id], bins = this.bins[m.id];
+      const bi = Math.min(bins.length - 1, Math.floor(m.s / f.m * bins.length));
+      bins[bi] = 1;
+      let n = 0; for (let i = 0; i < bins.length; i++) n += bins[i];
+      frazione = n / bins.length;
+      if (frazione >= quota) {
+        const prima = cov[f.id] || 0;
+        if (prima < f.req) {
+          cov = Object.assign({}, cov, { [f.id]: prima + 1 });
+          this.bins[f.id] = new Uint8Array(bins.length);
+          if (prima + 1 >= f.req) chiuso = f; else nuovo = f;
+        }
+        frazione = 0;
+      }
+    }
+    this.setState(s => ({
+      cov, gpsAcc: acc, gpsKmh: kmh, gpsPos: [px, py], gpsAt: Date.now(),
+      match: agganciato ? { id: m.id, dist: m.dist } : null,
+      frazione, kmOggi: s.kmOggi + dKm,
+      primiOggi: nuovo ? s.primiOggi + 1 : s.primiOggi,
+      chiusiOggi: chiuso ? s.chiusiOggi.concat([{ nome: chiuso.strada + ' · ' + chiuso.cod, m: chiuso.m }]) : s.chiusiOggi,
+      toast: chiuso ? 'Elemento chiuso · ' + chiuso.cod + ' · ' + chiuso.strada
+        : nuovo ? 'Primo passaggio validato · manca il secondo' : s.toast,
+    }));
+    if (chiuso || nuovo) { clearTimeout(this.tt); this.tt = setTimeout(() => this.setState({ toast: '' }), 2600); this.saveNow(); }
+    else if (agganciato) this.save();
+  }
+  nativo() {
+    if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.gps) return 'ios';
+    if (window.GpsNativo && window.GpsNativo.avvia) return 'android';
+    return '';
+  }
+  gps(on) {
+    const nat = this.nativo();
+    if (nat) {
+      try { localStorage.setItem('sorv:rec', on ? '1' : '0'); } catch (e) {}
+      window.pushFix = on ? (lat, lon, acc, speed) => this.onFix({ coords: { latitude: lat, longitude: lon, accuracy: acc, speed: speed } }) : null;
+      window.pushGpsError = on ? msg => this.setState({ gpsErr: msg || 'Segnale GPS non disponibile' }) : null;
+      if (nat === 'ios') window.webkit.messageHandlers.gps.postMessage(on ? 'start' : 'stop');
+      else if (on) window.GpsNativo.avvia(); else window.GpsNativo.ferma();
+      if (!on) this.saveNow();
+      this.setState({ rec: on, wakeOn: on, gpsErr: '' });
+      return;
+    }
+    if (!on) {
+      if (this.watch != null) navigator.geolocation.clearWatch(this.watch);
+      this.watch = null; this.last = null;
+      try { localStorage.setItem('sorv:rec', '0'); } catch (e) {}
+      if (this.wl) { try { this.wl.release(); } catch (e) {} this.wl = null; }
+      this.saveNow();
+      this.setState({ rec: false, wakeOn: false, gpsErr: '' });
+      return;
+    }
+    if (!navigator.geolocation) { this.setState({ gpsErr: 'Questo dispositivo non fornisce la posizione' }); return; }
+    try { localStorage.setItem('sorv:rec', '1'); } catch (e) {}
+    this.setState({ rec: true, gpsErr: '' });
+    this.wake();
+    if (this.watch != null) navigator.geolocation.clearWatch(this.watch);
+    this.watch = navigator.geolocation.watchPosition(
+      p => this.onFix(p),
+      e => this.setState({ gpsErr: e.code === 1 ? 'Permesso posizione negato' : 'Segnale GPS non disponibile' }),
+      { enableHighAccuracy: true, maximumAge: 1000, timeout: 15000 }
+    );
+  }
+  box(pad, cx, cy, w, h) { return [cx - w / 2, cy - h / 2, w, h].map(n => Math.round(n)).join(' '); }
+  go(screen) { return () => this.setState({ screen, salvata: false, toast: '' }); }
+
+  renderVals() {
+    const s = this.state;
+    if (!s.ready) return { rail: SCREENS.map(([id, label]) => ({ label, go: this.go(id), bg: 'transparent', fg: '#5C6169', bd: '#C9C4BB' })), isRete: true };
+    const f = (s.match && this.byId[s.match.id]) || this.route[s.idx % this.route.length];
+    const pass = s.cov[f.id] || 0;
+    const tol = this.props.tolleranzaM ?? 25;
+    const quota = this.props.quotaMin ?? 80;
+    const kmTotAll = Object.values(this.kmTot).reduce((a, b) => a + b, 0);
+    const pctTot = this.pct(s.cov);
+    const mid = s.gpsPos || f.mid, W = 2000, H = W * 352 / 402;
+
+    const parzPrimo = [], donePrimo = [], doneMinori = [];
+    for (const x of this.feats) {
+      const c = s.cov[x.id] || 0;
+      if (!c) continue;
+      if (x.req === 2) (c >= 2 ? donePrimo : parzPrimo).push({ d: x.d });
+      else doneMinori.push({ d: x.d });
+    }
+    const perStrada = {};
+    for (const x of this.feats) {
+      const o = perStrada[x.strada] || (perStrada[x.strada] = { m: 0, done: 0, resto: 0 });
+      o.m += x.m; const c = Math.min(s.cov[x.id] || 0, x.req);
+      o.done += x.m * c / x.req; if (c < x.req) o.resto += x.m;
+    }
+    const quasi = Object.entries(perStrada)
+      .map(([nome, o]) => ({ nome, pct: Math.round(o.done / o.m * 100), resto: o.resto }))
+      .filter(x => x.pct >= 55 && x.pct < 100).sort((a, b) => b.pct - a.pct).slice(0, 4)
+      .map(x => ({ nome: x.nome, pct: String(x.pct), resto: x.resto >= 1000 ? (x.resto / 1000).toFixed(1) + ' km' : x.resto + ' m' }));
+
+    const apertiGiro = this.route.filter(x => (s.cov[x.id] || 0) < x.req).length;
+
+    return {
+      rail: SCREENS.map(([id, label]) => ({
+        label, go: this.go(id),
+        bg: s.screen === id ? '#16181B' : 'transparent',
+        fg: s.screen === id ? '#fff' : '#5C6169',
+        bd: s.screen === id ? '#16181B' : '#C9C4BB',
+      })),
+      isRete: s.screen === 'rete', isGiro: s.screen === 'giro', isElemento: s.screen === 'elemento',
+      isAnomalia: s.screen === 'anomalia', isRiepilogo: s.screen === 'riepilogo',
+      toRete: this.go('rete'), toGiro: this.go('giro'), toElemento: this.go('elemento'),
+      toRiepilogo: this.go('riepilogo'), openAnomalia: this.go('anomalia'),
+
+      basePrimo: this.base.primo, baseSecondo: this.base.secondo, baseSecondaria: this.base.secondaria,
+      parzPrimo, donePrimo, doneMinori,
+      boxTot: this.fitBox,
+      boxZoom: this.box(0, mid[0], this.ey - mid[1], W, H),
+      boxElem: this.box(0, mid[0], this.ey - mid[1], 700, 700 * 170 / 370),
+      correnteD: f.d, posX: mid[0], posY: this.ey - mid[1], rBig: 90, rDot: 34,
+
+      pctTot: pctTot.toFixed(1), kmFatti: (pctTot / 100 * kmTotAll).toFixed(0), kmTot: kmTotAll.toFixed(0),
+      deltaPct: Math.max(0, pctTot - s.pctIniziale).toFixed(2),
+      livelli: Object.keys(LIV).map(k => {
+        let done = 0, tot = 0, aperti = 0;
+        for (const x of this.feats) if (x.key === k) { tot += x.m; const c = Math.min(s.cov[x.id] || 0, x.req); done += x.m * c / x.req; if (c < x.req) aperti++; }
+        return {
+          nome: LIV[k].nome, req: LIV[k].req === 2 ? '2 PASSAGGI' : '1 PASSAGGIO', tint: LIV[k].tint,
+          pct: (done / tot * 100).toFixed(0), km: (done / 1000).toFixed(1), kmTot: this.kmTot[k].toFixed(0),
+          elem: aperti + ' elementi aperti',
+        };
+      }),
+      quasi, giroNome: this.giroNome, giroResto: String(apertiGiro),
+      giroElem: String(this.route.length),
+      giroPct: String(Math.round((this.route.length - apertiGiro) / this.route.length * 100)),
+
+      corrStrada: f.strada, corrCodice: f.cod, corrM: String(f.m),
+      corrLivello: f.key === 'primo' ? '1º LIVELLO' : f.key === 'secondo' ? '2º LIVELLO' : 'SECONDARIA',
+      corrPassi: Array.from({ length: f.req }, (_, i) => ({
+        bg: i < pass ? '#E8590C' : 'transparent', bd: i < pass ? '#E8590C' : '#B9B4AC',
+      })),
+      corrStato: pass + '/' + f.req, corrColor: pass >= f.req ? '#0B7A5A' : '#E8590C',
+      corrProssimo: (pass + 1) + ' di ' + f.req,
+      corrIdStrada: f.id.split(':')[1], corrUltimo: pass ? 'oggi' : 'mai',
+      fixCoord: s.gpsPos
+        ? (this.g.origin[0] + s.gpsPos[0]).toFixed(0) + ' E · ' + (this.g.origin[1] + s.gpsPos[1]).toFixed(0) + ' N (UTM 32N)'
+        : 'posizione non disponibile · GPS ' + (s.rec ? 'in ricerca' : 'non attivo'),
+      fixColor: s.gpsPos ? '#16181B' : '#B45309',
+      kmLabel: 'KM SETTIMANA',
+
+      kmOggi: s.kmOggi.toFixed(2), chiusiOggi: String(s.chiusiOggi.length),
+      primiOggi: String(s.primiOggi), chiuseOggi: s.chiusiOggi.slice(-6).reverse(),
+      noChiuse: s.chiusiOggi.length === 0, noAnomalie: s.anomalie.length === 0,
+      nAnomalie: String(s.anomalie.length), anomColor: s.anomalie.length ? '#B45309' : '#16181B',
+      toast: s.toast,
+      registra: () => { this.avanza(); this.setState({ screen: 'giro' }); },
+      toggleRec: () => this.gps(!s.rec),
+      wkLabel: this.wk, wkPeriodo: weekPeriodo(this.wk),
+      esporta: () => this.esportaCopertura(),
+      azzera: () => this.azzeraSettimana(),
+      wakeLabel: this.nativo() ? (s.rec ? 'Rilievo attivo anche a schermo spento' : 'Rilievo in pausa')
+        : s.wakeOn ? 'Schermo tenuto acceso dall\u2019app'
+        : s.rec ? 'Tieni l\u2019app in primo piano e il telefono alimentato' : 'Rilievo in pausa',
+      wakeColor: s.wakeOn ? '#0B7A5A' : '#5C6169',
+      savedLabel: s.savedAt
+        ? 'Rilievo salvato sul telefono alle ' + new Date(s.savedAt).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })
+        : 'Il rilievo si salva sul telefono a ogni passaggio',
+      gpsStato: s.gpsErr ? s.gpsErr : !s.rec ? 'GPS non attivo' : s.gpsAcc == null ? 'Ricerca satelliti…' : 'Posizione attiva',
+      gpsColor: s.gpsErr ? '#B45309' : s.rec && s.gpsAcc != null ? '#0B7A5A' : '#5C6169',
+      gpsAcc: s.gpsAcc == null ? '—' : '±' + s.gpsAcc.toFixed(0) + ' m',
+      gpsKmh: s.gpsKmh == null ? '—' : s.gpsKmh.toFixed(0) + ' km/h',
+      gpsAgganciato: !!s.match,
+      gpsDist: s.match ? s.match.dist.toFixed(0) + ' m dall\u2019asse' : 'nessun segmento entro ' + tol + ' m',
+      fraz: (s.frazione * 100).toFixed(0), quotaMin: String(quota), tolleranza: String(tol),
+      recLabel: s.rec ? 'Pausa rilievo GPS' : 'Avvia rilievo GPS',
+      recBg: s.rec ? '#fff' : '#E8590C', recFg: s.rec ? '#16181B' : '#fff', recBd: s.rec ? '#16181B' : '#E8590C',
+
+      checklist: CHK.map((label, i) => ({
+        label, tick: s.chk[i] ? '✓' : '',
+        bd: s.chk[i] ? '#0B7A5A' : '#B9B4AC', bg: s.chk[i] ? '#0B7A5A' : '#fff',
+        toggle: () => this.setState(x => { const chk = x.chk.slice(); chk[i] = !chk[i]; return { chk }; }),
+      })),
+
+      tipi: TIPI.map(label => ({
+        label, pick: () => this.setState({ tipo: label }),
+        bg: s.tipo === label ? '#16181B' : '#fff', fg: s.tipo === label ? '#fff' : '#16181B',
+        bd: s.tipo === label ? '#16181B' : '#DCD9D4',
+      })),
+      gravita: GRAV.map(label => ({
+        label, pick: () => this.setState({ grav: label }),
+        bg: s.grav === label ? '#16181B' : '#fff', fg: s.grav === label ? '#fff' : '#16181B',
+      })),
+      foto: Array.from({ length: s.nFoto }, (_, i) => ({ label: 'FOTO ' + (i + 1) })),
+      addFoto: () => this.setState(x => ({ nFoto: Math.min(3, x.nFoto + 1) })),
+      note: s.note, setNote: e => this.setState({ note: e.target.value }),
+      salvaLabel: s.salvata ? 'Salvata ✓' : 'Salva anomalia',
+      salvaBg: s.salvata ? '#0B7A5A' : '#16181B',
+      salvaAnomalia: () => {
+        this.setState(x => ({
+          salvata: true,
+          anomalie: x.anomalie.concat([{ tipo: x.tipo, dove: f.strada + ' ' + f.cod, gravita: x.grav.toUpperCase(), nFoto: x.nFoto }]),
+        }));
+        setTimeout(() => this.setState({ screen: 'giro', salvata: false, note: '', nFoto: 2 }), 700);
+      },
+      anomalie: s.anomalie.map(a => ({
+        tipo: a.tipo, dove: a.dove, nFoto: String(a.nFoto), gravita: a.gravita,
+        fg: a.gravita === 'ALTA' ? '#fff' : '#B45309', bg: a.gravita === 'ALTA' ? '#B45309' : '#F6ECDD',
+      })),
+      sync: () => {
+        this.esportaCopertura();
+        if (s.anomalie.length) setTimeout(() => this.esportaAnomalie(), 600);
+        this.setState({ syncState: 'done' });
+      },
+      syncLabel: s.syncState === 'done' ? 'CSV esportati ✓ · esporta di nuovo' : 'Esporta copertura e anomalie (CSV)',
+      syncBg: s.syncState === 'done' ? '#0B7A5A' : '#E8590C',
+      syncHint: 'Un file per la copertura dei 2.706 elementi, uno per le ' + s.anomalie.length + ' anomalie della settimana ' + this.wk,
+    };
+  }
+}
+
+function weekKey(d) {
+  const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const day = t.getUTCDay() || 7;
+  t.setUTCDate(t.getUTCDate() + 4 - day);
+  const y0 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+  const n = Math.ceil(((t - y0) / 86400000 + 1) / 7);
+  return t.getUTCFullYear() + '-W' + String(n).padStart(2, '0');
+}
+function weekPeriodo(wk) {
+  const [y, w] = wk.split('-W').map(Number);
+  const g = new Date(Date.UTC(y, 0, 4));
+  const lun = new Date(g); lun.setUTCDate(g.getUTCDate() - ((g.getUTCDay() || 7) - 1) + (w - 1) * 7);
+  const dom = new Date(lun); dom.setUTCDate(lun.getUTCDate() + 6);
+  const f = d => d.getUTCDate() + ' ' + ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'][d.getUTCMonth()];
+  return 'dal ' + f(lun) + ' al ' + f(dom);
+}
+function hash(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return Math.abs(h) % 100;
+}
+</script>
+</body>
+</html>
