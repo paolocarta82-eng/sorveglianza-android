@@ -12,7 +12,7 @@
 
     <application
         android:label="Copertura Rete"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/ic_app"
         android:theme="@style/Theme.CoperturaRete"
         android:hardwareAccelerated="true"
         android:allowBackup="true">
