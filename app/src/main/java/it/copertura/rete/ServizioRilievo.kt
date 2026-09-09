@@ -52,7 +52,6 @@ class ServizioRilievo : Service() {
         val req = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000)
             .setMinUpdateIntervalMillis(1000)
             .setMinUpdateDistanceMeters(3f)
-            .setWaitForAccurateFix(false)
             .build()
 
         try {
